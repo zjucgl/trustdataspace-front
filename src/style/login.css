@@ -1,0 +1,116 @@
+.wave {
+  position: fixed;
+  height: 100%;
+  width: 80%;
+  left: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+.login-container {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  grid-gap: 0rem;
+  padding: 0 0rem;
+}
+.login-container-new {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  /* display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  grid-gap: 0rem;
+  padding: 0 0rem; */
+}
+
+.img {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  justify-self: center;
+}
+
+.img img {
+  width: 500px;
+}
+
+.login-box {
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+  place-self: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.login-box-new {
+  place-self: center; /* 水平和垂直居中 */
+  display: flex; /* 使用flex布局以确保内容居中 */
+  justify-content: center; /* 水平居中内容 */
+  align-items: center; /* 垂直居中内容 */
+  height: 100%; /* 确保子元素高度占满网格单元 */
+}
+
+.login-form {
+  width: 360px;
+}
+
+.avatar {
+  width: 350px;
+  height: 80px;
+}
+
+.login-form h2 {
+  text-transform: uppercase;
+  margin: 15px 0;
+  color: #999;
+  font:
+    bold 200% Consolas,
+    Monaco,
+    monospace;
+}
+
+@media screen and (max-width: 1180px) {
+  .login-container {
+    grid-gap: 9rem;
+  }
+
+  .login-form {
+    width: 290px;
+  }
+
+  .login-form h2 {
+    font-size: 2.4rem;
+    margin: 8px 0;
+  }
+
+  .img img {
+    width: 360px;
+  }
+
+  .avatar {
+    width: 280px;
+    height: 80px;
+  }
+}
+
+@media screen and (max-width: 968px) {
+  .wave {
+    display: none;
+  }
+
+  .img {
+    display: none;
+  }
+
+  .login-container {
+    grid-template-columns: 1fr;
+  }
+
+  .login-box {
+    justify-content: center;
+  }
+}
