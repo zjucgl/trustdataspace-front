@@ -125,13 +125,11 @@
           <el-descriptions-item label="STS端口">
             {{ detailData.stsPort }}
           </el-descriptions-item>
-          <el-descriptions-item label="数据库地址" v-if="detailData.dbHost">
-            {{ detailData.dbHost }}:{{ detailData.dbPort }}/{{
-              detailData.dbName
-            }}
-          </el-descriptions-item>
           <el-descriptions-item label="部署服务器">
             {{ detailData.deployHost }}
+          </el-descriptions-item>
+          <el-descriptions-item label="启用扩展">
+            {{ detailData.enabledDataplaneExtensions || "http" }}
           </el-descriptions-item>
         </el-descriptions>
       </el-dialog>

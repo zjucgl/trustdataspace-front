@@ -33,42 +33,24 @@
           check-strictly
         />
       </el-form-item>
-      <el-divider content-position="left">数据源配置（可选）</el-divider>
-      <el-form-item label="数据库地址">
-        <el-input
-          v-model="formData.dbHost"
-          placeholder="如 rm-xxx.mysql.rds.aliyuncs.com"
-        />
-      </el-form-item>
-      <el-form-item label="数据库端口">
-        <el-input-number v-model="formData.dbPort" :min="1" :max="65535" />
-      </el-form-item>
-      <el-form-item label="数据库名">
-        <el-input
-          v-model="formData.dbName"
-          placeholder="数据库 schema 名称"
-        />
-      </el-form-item>
-      <el-form-item label="只读用户名">
-        <el-input
-          v-model="formData.dbReadonlyUser"
-          placeholder="只读账号"
-        />
-      </el-form-item>
-      <el-form-item label="只读密码">
-        <el-input
-          v-model="formData.dbReadonlyPwd"
-          type="password"
-          show-password
-          placeholder="只读密码"
-        />
-      </el-form-item>
       <el-divider content-position="left">部署配置</el-divider>
       <el-form-item label="部署服务器IP">
         <el-input
           v-model="formData.deployHost"
           placeholder="EDC 部署目标服务器 IP"
         />
+      </el-form-item>
+      <el-form-item label="启用扩展" prop="enabledExtensions">
+        <el-checkbox-group v-model="formData.enabledExtensions">
+          <el-checkbox
+            v-for="ext in extensionOptions"
+            :key="ext.value"
+            :label="ext.value"
+            :disabled="ext.value === 'http'"
+          >
+            {{ ext.label }}
+          </el-checkbox>
+        </el-checkbox-group>
       </el-form-item>
       <el-form-item label="备注">
         <el-input v-model="formData.remark" type="textarea" :rows="2" />
@@ -84,8 +66,22 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
-import type { ProviderConfigData } from "@/api/provider/index";
+import {
+  ALL_DATAPLANE_EXTENSIONS,
+  type DataplaneExtension,
+  type ProviderConfigData
+} from "@/api/provider/index";
 import type { DeptData } from "@/api/orga/dept";
+
+type FormState = {
+  id: number | undefined;
+  providerName: string;
+  providerLabel: string;
+  deptId: number | undefined;
+  deployHost: string;
+  enabledExtensions: DataplaneExtension[];
+  remark: string;
+};
 
 const props = defineProps<{
   visible: boolean;
@@ -98,23 +94,31 @@ const emit = defineEmits<{
   (e: "save", data: ProviderConfigData): void;
 }>();
 
+const extensionLabels: Record<DataplaneExtension, string> = {
+  http: "HTTP（默认）",
+  s3: "对象存储 S3 / OSS",
+  jdbc: "关系数据库 JDBC",
+  sftp: "SFTP 文件系统"
+};
+
+const extensionOptions = ALL_DATAPLANE_EXTENSIONS.map(value => ({
+  value,
+  label: extensionLabels[value]
+}));
+
 const formRef = ref<FormInstance>();
 
-const getDefaultFormData = () => ({
-  id: undefined as number | undefined,
+const getDefaultFormData = (): FormState => ({
+  id: undefined,
   providerName: "",
   providerLabel: "",
-  deptId: undefined as number | undefined,
-  dbHost: "",
-  dbPort: 3306,
-  dbName: "",
-  dbReadonlyUser: "",
-  dbReadonlyPwd: "",
+  deptId: undefined,
   deployHost: "",
+  enabledExtensions: ["http"],
   remark: ""
 });
 
-const formData = reactive(getDefaultFormData());
+const formData = reactive<FormState>(getDefaultFormData());
 
 const rules = reactive<FormRules>({
   providerName: [
@@ -130,11 +134,34 @@ const rules = reactive<FormRules>({
   ]
 });
 
+function parseExtensions(raw: string | undefined): DataplaneExtension[] {
+  if (!raw) return ["http"];
+  const set = new Set<DataplaneExtension>(["http"]);
+  raw.split(",").forEach(token => {
+    const trimmed = token.trim();
+    if (
+      trimmed &&
+      ALL_DATAPLANE_EXTENSIONS.includes(trimmed as DataplaneExtension)
+    ) {
+      set.add(trimmed as DataplaneExtension);
+    }
+  });
+  return Array.from(set);
+}
+
 watch(
   () => props.data,
   val => {
     if (val) {
-      Object.assign(formData, val);
+      const next = getDefaultFormData();
+      next.id = val.id;
+      next.providerName = val.providerName ?? "";
+      next.providerLabel = val.providerLabel ?? "";
+      next.deptId = val.deptId;
+      next.deployHost = val.deployHost ?? "";
+      next.enabledExtensions = parseExtensions(val.enabledDataplaneExtensions);
+      next.remark = val.remark ?? "";
+      Object.assign(formData, next);
     } else {
       Object.assign(formData, getDefaultFormData());
     }
@@ -149,7 +176,16 @@ function close() {
 function submit() {
   formRef.value?.validate(valid => {
     if (valid) {
-      emit("save", { ...formData });
+      const payload: ProviderConfigData = {
+        id: formData.id,
+        providerName: formData.providerName,
+        providerLabel: formData.providerLabel,
+        deptId: formData.deptId,
+        deployHost: formData.deployHost,
+        enabledDataplaneExtensions: formData.enabledExtensions.join(","),
+        remark: formData.remark
+      };
+      emit("save", payload);
       close();
     }
   });

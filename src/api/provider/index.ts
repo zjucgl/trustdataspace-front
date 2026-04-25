@@ -1,5 +1,14 @@
 import { http } from "@/utils/http";
 
+export type DataplaneExtension = "http" | "s3" | "jdbc" | "sftp";
+
+export const ALL_DATAPLANE_EXTENSIONS: ReadonlyArray<DataplaneExtension> = [
+  "http",
+  "s3",
+  "jdbc",
+  "sftp"
+];
+
 export type ProviderConfigData = {
   id?: number;
   deptId?: number;
@@ -12,12 +21,8 @@ export type ProviderConfigData = {
   dataplanePublicPort?: number;
   identityHubPort?: number;
   stsPort?: number;
-  dbHost?: string;
-  dbPort?: number;
-  dbName?: string;
-  dbReadonlyUser?: string;
-  dbReadonlyPwd?: string;
   deployHost?: string;
+  enabledDataplaneExtensions?: string;
   status?: string;
   remark?: string;
   deptName?: string;
