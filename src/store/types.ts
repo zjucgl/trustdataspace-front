@@ -47,4 +47,5 @@ export type userType = {
   deptId?: number;
   deptName?: string;
   participantId?: string;
+  providerName?: string;
 };

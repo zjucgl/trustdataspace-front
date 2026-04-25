@@ -1,7 +1,6 @@
 import { http } from "@/utils/http";
-// import { getParticipantType } from "@/utils/mvd";
-// const webType = getParticipantType();
-const providerType = "providerQA";
+import { getParticipantType } from "@/utils/mvd";
+
 export type AssetData = {
   id?: string;
   baseUrl?: string;
@@ -18,7 +17,7 @@ export type DefinitionData = {
 export const getAssetList = (data?: any) => {
   return http.request<any>(
     "post",
-    providerType + "/management/v3/assets/request",
+    getParticipantType() + "/management/v3/assets/request",
     {
       headers: {
         "X-Api-Key": "password"
@@ -28,25 +27,33 @@ export const getAssetList = (data?: any) => {
   );
 };
 export const creatAsset = (data?: any) => {
-  return http.request<any>("post", providerType + "/management/v3/assets", {
-    headers: {
-      "X-Api-Key": "password"
-    },
-    data: data
-  });
+  return http.request<any>(
+    "post",
+    getParticipantType() + "/management/v3/assets",
+    {
+      headers: {
+        "X-Api-Key": "password"
+      },
+      data: data
+    }
+  );
 };
 export const updateAsset = (data?: any) => {
-  return http.request<any>("put", providerType + "/management/v3/assets", {
-    headers: {
-      "X-Api-Key": "password"
-    },
-    data: data
-  });
+  return http.request<any>(
+    "put",
+    getParticipantType() + "/management/v3/assets",
+    {
+      headers: {
+        "X-Api-Key": "password"
+      },
+      data: data
+    }
+  );
 };
 export const removeAsset = (data?: any) => {
   return http.request<any>(
     "delete",
-    providerType + "/management/v3/assets/" + data,
+    getParticipantType() + "/management/v3/assets/" + data,
     {
       headers: {
         "X-Api-Key": "password"
@@ -57,7 +64,7 @@ export const removeAsset = (data?: any) => {
 export const creatContractdefinitions = (data?: any) => {
   return http.request<any>(
     "post",
-    providerType + "/management/v3/contractdefinitions",
+    getParticipantType() + "/management/v3/contractdefinitions",
     {
       headers: {
         "X-Api-Key": "password"

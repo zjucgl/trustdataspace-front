@@ -1,6 +1,6 @@
 import { http } from "@/utils/http";
 import { getParticipantType } from "@/utils/mvd";
-const webType = "providerQA";
+
 export type ContractData = {
   Id: string;
   roleName?: string;
@@ -12,7 +12,7 @@ export type ContractData = {
 export const getContractList = (data?: any) => {
   return http.request<any>(
     "post",
-    webType + "/management/v3/contractdefinitions/request",
+    getParticipantType() + "/management/v3/contractdefinitions/request",
     {
       headers: {
         "X-Api-Key": "password"
@@ -25,7 +25,7 @@ export const getContractList = (data?: any) => {
 export const getContractById = (data?: any) => {
   return http.request<any>(
     "get",
-    webType + `/management/v3/contractdefinitions/${data}`,
+    getParticipantType() + `/management/v3/contractdefinitions/${data}`,
     {
       headers: {
         "X-Api-Key": "password"
@@ -38,7 +38,7 @@ export const getContractById = (data?: any) => {
 export const createContract = (data?: any) => {
   return http.request<any>(
     "post",
-    webType + "/management/v3/contractdefinitions",
+    getParticipantType() + "/management/v3/contractdefinitions",
     {
       headers: {
         "X-Api-Key": "password"
@@ -51,7 +51,7 @@ export const createContract = (data?: any) => {
 export const updateContract = (data?: any) => {
   return http.request<any>(
     "put",
-    webType + "/management/v3/contractdefinitions",
+    getParticipantType() + "/management/v3/contractdefinitions",
     {
       headers: {
         "X-Api-Key": "password"
@@ -64,7 +64,7 @@ export const updateContract = (data?: any) => {
 export const deleteContract = (data?: any) => {
   return http.request<any>(
     "delete",
-    webType + `/management/v3/contractdefinitions/${data}`,
+    getParticipantType() + `/management/v3/contractdefinitions/${data}`,
     {
       headers: {
         "X-Api-Key": "password"

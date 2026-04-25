@@ -44,7 +44,10 @@ export const useUserStore = defineStore({
     deptName: storageLocal().getItem<DataInfo<string>>(userKey)?.deptName ?? "",
     // 参与者Id
     participantId:
-      storageLocal().getItem<DataInfo<string>>(userKey)?.participantId ?? ""
+      storageLocal().getItem<DataInfo<string>>(userKey)?.participantId ?? "",
+    // Provider 标识（由后端 provider_config 提供，用于动态路由）
+    providerName:
+      storageLocal().getItem<DataInfo<string>>(userKey)?.providerName ?? ""
   }),
   actions: {
     /** 获取验证码 */

@@ -1,7 +1,6 @@
 import { http } from "@/utils/http";
 import { getParticipantType } from "@/utils/mvd";
-// const webType = getParticipantType();
-const webType = "providerQA";
+
 export type PolicyData = {
   id?: string;
   permission?: string;
@@ -11,7 +10,7 @@ export type PolicyData = {
 export const getPolicyList = (data?: any) => {
   return http.request<any>(
     "post",
-    webType + "/management/v3/policydefinitions/request",
+    getParticipantType() + "/management/v3/policydefinitions/request",
     {
       headers: {
         "X-Api-Key": "password"
@@ -24,7 +23,7 @@ export const getPolicyList = (data?: any) => {
 export const getPolicyById = (data?: any) => {
   return http.request<any>(
     "get",
-    webType + `/management/v3/policydefinitions/${data}`,
+    getParticipantType() + `/management/v3/policydefinitions/${data}`,
     {
       headers: {
         "X-Api-Key": "password"
@@ -37,7 +36,7 @@ export const getPolicyById = (data?: any) => {
 export const createPolicy = (data?: any) => {
   return http.request<any>(
     "post",
-    webType + "/management/v3/policydefinitions",
+    getParticipantType() + "/management/v3/policydefinitions",
     {
       headers: {
         "X-Api-Key": "password"
@@ -50,7 +49,7 @@ export const createPolicy = (data?: any) => {
 export const updatePolicy = (data?: any) => {
   return http.request<any>(
     "put",
-    webType + "/management/v3/policydefinitions",
+    getParticipantType() + "/management/v3/policydefinitions",
     {
       headers: {
         "X-Api-Key": "password"
@@ -63,7 +62,7 @@ export const updatePolicy = (data?: any) => {
 export const deletePolicy = (data?: any) => {
   return http.request<any>(
     "delete",
-    webType + `/management/v3/policydefinitions/${data}`,
+    getParticipantType() + `/management/v3/policydefinitions/${data}`,
     {
       headers: {
         "X-Api-Key": "password"

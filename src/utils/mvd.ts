@@ -17,20 +17,25 @@ export function getParticipantWebIp(): any {
   return ip;
 }
 export function getParticipantType(): any {
-  const did = useUserStoreHook()?.participantId;
+  const store = useUserStoreHook();
+  // 优先使用 store 中的 providerName（由后端 provider_config 提供）
+  const providerName = store?.providerName;
+  if (providerName) {
+    return providerName;
+  }
+  // 回退：根据 DID 判断
+  const did = store?.participantId;
   if (!did) {
-    // 如果did是null或undefined，返回一个默认值或者抛出一个错误
     console.log("participantId is not available");
     return "consumer";
   }
-  const ipPattern = /(?<=did:web:)[^%]+/; // 正则表达式匹配did:web:后的IP地址部分
+  const ipPattern = /(?<=did:web:)[^%]+/;
   const matchResult = did.match(ipPattern);
   if (!matchResult) {
     console.log("No match found for IP pattern in participantId");
     return "consumer";
   }
   const ip = matchResult[0];
-  //console.log("IP address of participant is:", ip);
   if (ip === "192.168.14.3") {
     return "consumer";
   } else {
