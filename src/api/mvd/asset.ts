@@ -1,11 +1,29 @@
 import { http } from "@/utils/http";
 import { getParticipantType } from "@/utils/mvd";
 
+export type AssetSourceType = "HttpData" | "AmazonS3" | "JdbcDataAddress";
+
+export const ASSET_SOURCE_TYPES: ReadonlyArray<AssetSourceType> = [
+  "HttpData",
+  "AmazonS3",
+  "JdbcDataAddress"
+];
+
 export type AssetData = {
   id?: string;
-  baseUrl?: string;
   description?: string;
   contractdefinition?: string;
+  sourceType?: AssetSourceType;
+  baseUrl?: string;
+  s3Endpoint?: string;
+  s3Bucket?: string;
+  s3ObjectName?: string;
+  s3AccessKey?: string;
+  s3SecretKey?: string;
+  jdbcUrl?: string;
+  jdbcUser?: string;
+  jdbcPassword?: string;
+  jdbcTable?: string;
 };
 export type DefinitionData = {
   id?: string;

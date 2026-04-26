@@ -338,27 +338,42 @@ const formVisible = ref(false);
 const definitionFormData = ref<any>();
 const definitionFormVisible = ref(false);
 
-const addAsset = (data: any) => {
-  data = {
+const addAsset = () => {
+  formData.value = {
     id: null,
     baseUrl: "",
     description: "",
     assetPrice: 0,
     assetQuantity: 1,
-    type: "add"
+    type: "add",
+    sourceType: "HttpData"
   };
   formVisible.value = true;
-  formData.value = data;
 };
 const editAsset = (row: any) => {
+  const addr = row.dataAddress ?? {};
+  const sourceType =
+    addr.type === "AmazonS3" || addr.type === "JdbcDataAddress"
+      ? addr.type
+      : "HttpData";
   const data = {
     id: row["@id"],
-    baseUrl: row.dataAddress.baseUrl,
-    description: row.properties.description,
-    contractdefinition: row.properties.contractdefinition,
+    description: row.properties?.description,
+    contractdefinition: row.properties?.contractdefinition,
     assetPrice: row.assetPrice,
     assetQuantity: row.assetQuantity,
-    type: "update"
+    type: "update",
+    sourceType,
+    baseUrl: addr.baseUrl ?? "",
+    s3Endpoint: addr.endpointOverride ?? "",
+    s3Bucket: addr.bucketName ?? "",
+    s3ObjectName: addr.objectName ?? "",
+    s3AccessKey: addr.accessKeyId ?? "",
+    s3SecretKey: addr.secretAccessKey ?? "",
+    jdbcUrl: addr.jdbcUrl ?? "",
+    jdbcUser: addr.user ?? "",
+    jdbcPassword: addr.password ?? "",
+    jdbcTable: addr.table ?? ""
   };
   formVisible.value = true;
   formData.value = data;
@@ -549,6 +564,37 @@ const updateAllAsset = async () => {
     }
   }
 };
+const buildDataAddress = (data: AssetData) => {
+  const sourceType = data.sourceType ?? "HttpData";
+  if (sourceType === "AmazonS3") {
+    return {
+      "@type": "DataAddress",
+      type: "AmazonS3",
+      endpointOverride: data.s3Endpoint,
+      bucketName: data.s3Bucket,
+      objectName: data.s3ObjectName,
+      accessKeyId: data.s3AccessKey,
+      secretAccessKey: data.s3SecretKey
+    };
+  }
+  if (sourceType === "JdbcDataAddress") {
+    return {
+      "@type": "DataAddress",
+      type: "JdbcDataAddress",
+      jdbcUrl: data.jdbcUrl,
+      user: data.jdbcUser,
+      password: data.jdbcPassword,
+      table: data.jdbcTable
+    };
+  }
+  return {
+    "@type": "DataAddress",
+    type: "HttpData",
+    baseUrl: data.baseUrl,
+    proxyPath: "true",
+    proxyQueryParams: "true"
+  };
+};
 const transferToAssetData = (data: AssetData) => {
   const res = {
     "@context": ["https://w3id.org/edc/connector/management/v0.0.1"],
@@ -560,13 +606,7 @@ const transferToAssetData = (data: AssetData) => {
         : null,
       description: data.description
     },
-    dataAddress: {
-      "@type": "DataAddress",
-      type: "HttpData",
-      baseUrl: data.baseUrl,
-      proxyPath: "true",
-      proxyQueryParams: "true"
-    }
+    dataAddress: buildDataAddress(data)
   };
   return res;
 };
