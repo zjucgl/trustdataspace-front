@@ -1,11 +1,14 @@
 const { VITE_HIDE_HOME } = import.meta.env;
 const Layout = () => import("@/layout/index.vue");
 
+const homeRedirect =
+  VITE_HIDE_HOME === "true" ? "/dashboard/index" : "/welcome";
+
 export default {
   path: "/",
   name: "Home",
   component: Layout,
-  redirect: "/welcome",
+  redirect: homeRedirect,
   meta: {
     icon: "ep:home-filled",
     title: "首页",
