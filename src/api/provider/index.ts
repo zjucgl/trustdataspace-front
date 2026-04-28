@@ -61,3 +61,26 @@ export const removeProvider = (id: number) => {
 export const downloadDeployScript = (id: number) => {
   window.open(`/api/provider/deploy-script/${id}`, "_blank");
 };
+
+export type HealthCheckItem = {
+  ok: boolean;
+  latencyMs?: number;
+  httpStatus?: number;
+  error?: string;
+};
+
+export type HealthCheckResult = {
+  startup: HealthCheckItem;
+  management: HealthCheckItem;
+  dsp: HealthCheckItem;
+  did: HealthCheckItem;
+  overall: "ok" | "partial" | "down";
+  checkedAt: string;
+};
+
+export const healthCheck = (id: number) => {
+  return http.request<OperateResult<HealthCheckResult>>(
+    "get",
+    `/provider/healthCheck/${id}`
+  );
+};

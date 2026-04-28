@@ -96,7 +96,7 @@
         @save="save"
       />
 
-      <el-dialog v-model="detailVisible" title="Provider 详情" width="500px">
+      <el-dialog v-model="detailVisible" title="Provider 详情" width="640px">
         <el-descriptions :column="1" border v-if="detailData">
           <el-descriptions-item label="Provider标识">
             {{ detailData.providerName }}
@@ -132,6 +132,54 @@
             {{ detailData.enabledDataplaneExtensions || "http" }}
           </el-descriptions-item>
         </el-descriptions>
+
+        <el-divider content-position="left">健康自检</el-divider>
+        <div class="flex justify-between mb-2">
+          <span class="text-xs text-gray-500">
+            {{
+              healthResult
+                ? "上次检测：" + healthResult.checkedAt
+                : "尚未检测"
+            }}
+          </span>
+          <el-button
+            type="primary"
+            size="small"
+            :loading="healthLoading"
+            @click="runHealthCheck"
+          >
+            立即检测
+          </el-button>
+        </div>
+        <el-table
+          v-if="healthResult"
+          :data="healthRows"
+          size="small"
+          :show-header="true"
+          border
+        >
+          <el-table-column prop="label" label="检测项" width="180" />
+          <el-table-column label="结果" width="80" align="center">
+            <template #default="{ row }">
+              <el-tag :type="row.item.ok ? 'success' : 'danger'" size="small">
+                {{ row.item.ok ? "OK" : "FAIL" }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="HTTP" width="80" align="center">
+            <template #default="{ row }">
+              {{ row.item.httpStatus ?? "-" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="耗时" width="90" align="center">
+            <template #default="{ row }">
+              {{
+                row.item.latencyMs !== undefined ? row.item.latencyMs + "ms" : "-"
+              }}
+            </template>
+          </el-table-column>
+          <el-table-column label="错误" prop="item.error" />
+        </el-table>
       </el-dialog>
     </div>
   </el-watermark>
@@ -141,12 +189,16 @@
 import { ref, reactive, onMounted } from "vue";
 import {
   type ProviderConfigData,
+  type HealthCheckItem,
+  type HealthCheckResult,
   getProviderList,
   addProvider,
   updateProvider,
   removeProvider as removeProviderApi,
-  downloadDeployScript
+  downloadDeployScript,
+  healthCheck
 } from "@/api/provider/index";
+import { computed } from "vue";
 import { getDeptPage, type DeptData } from "@/api/orga/dept";
 import { showErrorMessage, showSuccessMessage } from "@/utils/message";
 import { ElMessageBox } from "element-plus";
@@ -163,6 +215,39 @@ const formVisible = ref(false);
 const formData = ref<ProviderConfigData | null>(null);
 const detailVisible = ref(false);
 const detailData = ref<ProviderConfigData | null>(null);
+const healthResult = ref<HealthCheckResult | null>(null);
+const healthLoading = ref(false);
+
+type HealthRow = { label: string; item: HealthCheckItem };
+
+const healthRows = computed<HealthRow[]>(() => {
+  const r = healthResult.value;
+  if (!r) return [];
+  return [
+    { label: "Tractus-X 启动 (/api/check/startup)", item: r.startup },
+    { label: "Management API", item: r.management },
+    { label: "DSP Protocol", item: r.dsp },
+    { label: "DID 文档", item: r.did }
+  ];
+});
+
+async function runHealthCheck() {
+  if (!detailData.value?.id) return;
+  healthLoading.value = true;
+  try {
+    const res = await healthCheck(detailData.value.id);
+    if (res.success && res.result) {
+      healthResult.value = res.result;
+    } else {
+      showErrorMessage(res.message || "检测失败");
+    }
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "检测失败";
+    showErrorMessage(msg);
+  } finally {
+    healthLoading.value = false;
+  }
+}
 
 const statusTypeMap: Record<string, string> = {
   PENDING: "info",
@@ -217,6 +302,7 @@ function edit(row: ProviderConfigData) {
 
 function detail(row: ProviderConfigData) {
   detailData.value = row;
+  healthResult.value = null;
   detailVisible.value = true;
 }
 
